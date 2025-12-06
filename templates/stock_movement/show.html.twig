@@ -1,0 +1,246 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mouvement #{{ stock_movement.id }}{% endblock %}
+
+{% block page_title %}
+    Détails du mouvement de stock
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <a href="{{ path('app_stock_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+            </a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash me-2"></i>Supprimer
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-{{ stock_movement.type == 'in' ? 'success' : (stock_movement.type == 'out' ? 'danger' : 'warning') }} text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-{{ stock_movement.type == 'in' ? 'arrow-down' : (stock_movement.type == 'out' ? 'arrow-up' : 'sliders-h') }} me-2"></i>
+                        Mouvement de type: 
+                        {% if stock_movement.type == 'in' %}
+                            Entrée
+                        {% elseif stock_movement.type == 'out' %}
+                            Sortie
+                        {% else %}
+                            Ajustement
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">Informations produit</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Produit:</th>
+                                    <td>
+                                        <strong>{{ stock_movement.product.name }}</strong><br>
+                                        <a href="{{ path('app_product_show', {id: stock_movement.product.id}) }}" class="btn btn-sm btn-outline-primary mt-1">
+                                            <i class="fas fa-eye me-1"></i>Voir le produit
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Code-barres:</th>
+                                    <td><code>{{ stock_movement.product.barcode }}</code></td>
+                                </tr>
+                                <tr>
+                                    <th>Catégorie:</th>
+                                    <td>{{ stock_movement.product.category.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Stock actuel:</th>
+                                    <td>
+                                        <span class="badge bg-info fs-6">
+                                            {{ stock_movement.product.stockQuantity }} unités
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">Détails du mouvement</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Type:</th>
+                                    <td>
+                                        {% if stock_movement.type == 'in' %}
+                                            <span class="badge bg-success fs-6">
+                                                <i class="fas fa-arrow-down"></i> Entrée
+                                            </span>
+                                        {% elseif stock_movement.type == 'out' %}
+                                            <span class="badge bg-danger fs-6">
+                                                <i class="fas fa-arrow-up"></i> Sortie
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-warning fs-6">
+                                                <i class="fas fa-sliders-h"></i> Ajustement
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Quantité:</th>
+                                    <td>
+                                        <h3 class="mb-0 text-{{ stock_movement.type == 'in' ? 'success' : 'danger' }}">
+                                            {{ stock_movement.type == 'in' ? '+' : '-' }}{{ stock_movement.quantity }}
+                                        </h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Date:</th>
+                                    <td>{{ stock_movement.createdAt|date('d/m/Y à H:i:s') }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    {% if stock_movement.reason %}
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-comment me-2"></i>Motif / Commentaire
+                            </h6>
+                            <div class="alert alert-light">
+                                {{ stock_movement.reason }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Impact du mouvement #}
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Impact du mouvement
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1">
+                        <strong>Effet sur le stock:</strong>
+                    </p>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted">Stock avant</small><br>
+                                <h4 class="mb-0">
+                                    {% if stock_movement.type == 'in' %}
+                                        {{ stock_movement.product.stockQuantity - stock_movement.quantity }}
+                                    {% elseif stock_movement.type == 'out' %}
+                                        {{ stock_movement.product.stockQuantity + stock_movement.quantity }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </h4>
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-arrow-right fa-2x text-primary"></i>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-primary text-white rounded">
+                                <small>Stock après</small><br>
+                                <h4 class="mb-0">{{ stock_movement.product.stockQuantity }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations système
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>ID du mouvement:</strong> #{{ stock_movement.id }}</p>
+                    <p><strong>Enregistré le:</strong><br>{{ stock_movement.createdAt|date('d/m/Y à H:i:s') }}</p>
+                    <p class="mb-0"><strong>Type d'opération:</strong><br>
+                        {% if stock_movement.type == 'in' %}
+                            Augmentation du stock
+                        {% elseif stock_movement.type == 'out' %}
+                            Diminution du stock
+                        {% else %}
+                            Ajustement inventaire
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Alertes
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if stock_movement.product.stockQuantity <= stock_movement.product.minStockLevel %}
+                        <div class="alert alert-danger mb-0">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <strong>Stock bas!</strong><br>
+                            Le stock actuel ({{ stock_movement.product.stockQuantity }}) 
+                            est inférieur au seuil minimum ({{ stock_movement.product.minStockLevel }}).
+                        </div>
+                    {% elseif stock_movement.product.stockQuantity == 0 %}
+                        <div class="alert alert-danger mb-0">
+                            <i class="fas fa-times-circle me-2"></i>
+                            <strong>Rupture de stock!</strong><br>
+                            Ce produit n'est plus en stock.
+                        </div>
+                    {% else %}
+                        <p class="text-success mb-0">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Niveau de stock correct
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Modal de suppression #}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmer la suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer ce mouvement de stock ?</p>
+                <p class="text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Attention:</strong> Cette action ne restaurera PAS le stock précédent. 
+                    Vous devrez créer un nouveau mouvement pour corriger le stock si nécessaire.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form method="post" action="{{ path('app_stock_delete', {id: stock_movement.id}) }}" style="display: inline;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ stock_movement.id) }}">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Supprimer définitivement
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

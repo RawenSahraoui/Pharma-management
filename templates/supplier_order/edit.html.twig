@@ -1,0 +1,39 @@
+{# templates/supplier_order/edit.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1>{{ page_title }}</h1>
+
+    {{ form_start(form) }}
+        <div class="mb-3">
+            {{ form_label(form.supplier) }}
+            {{ form_widget(form.supplier, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.supplier) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.orderDate) }}
+            {{ form_widget(form.orderDate, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.orderDate) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.status) }}
+            {{ form_widget(form.status, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.status) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.total) }}
+            {{ form_widget(form.total, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.total) }}
+        </div>
+
+        <button class="btn btn-primary">Enregistrer</button>
+        <a href="{{ path('app_supplier_order_index') }}" class="btn btn-secondary">Annuler</a>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

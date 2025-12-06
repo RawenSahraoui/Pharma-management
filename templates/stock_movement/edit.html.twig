@@ -1,0 +1,166 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ isNew ? 'Nouveau Mouvement' : 'Modifier Mouvement' }}{% endblock %}
+
+{% block page_title %}
+    {{ isNew ? 'Nouveau Mouvement de Stock' : 'Modifier le Mouvement' }}
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <a href="{{ path('app_stock_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-{{ isNew ? 'plus' : 'edit' }} me-2"></i>
+                        {{ isNew ? 'Enregistrer un nouveau mouvement' : 'Modifier le mouvement' }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                    
+                    {# Instructions #}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Instructions:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><strong>Entrée:</strong> Augmente le stock (réception fournisseur, retour client)</li>
+                            <li><strong>Sortie:</strong> Diminue le stock (vente, perte, péremption)</li>
+                            <li><strong>Ajustement:</strong> Définit le stock à une valeur exacte (inventaire)</li>
+                        </ul>
+                    </div>
+
+                    <div class="row">
+                        {# Informations du mouvement #}
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-box me-2"></i>Produit et type
+                            </h6>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.product) }}
+                                <small class="text-muted">
+                                    <i class="fas fa-search me-1"></i>
+                                    Sélectionnez le produit concerné
+                                </small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.type) }}
+                            </div>
+                        </div>
+
+                        {# Quantité et détails #}
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-hashtag me-2"></i>Quantité et détails
+                            </h6>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.quantity) }}
+                                <small class="text-muted">
+                                    <i class="fas fa-calculator me-1"></i>
+                                    Nombre d'unités à ajouter, retirer ou ajuster
+                                </small>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_row(form.reason) }}
+                                <small class="text-muted">
+                                    Exemples: "Réception commande #123", "Vente", "Inventaire mensuel", "Produit périmé"
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    {# Informations supplémentaires #}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Attention:</strong> 
+                        Cette opération modifiera le stock du produit sélectionné. 
+                        Assurez-vous que toutes les informations sont correctes avant de valider.
+                    </div>
+
+                    {# Boutons #}
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save me-2"></i>
+                                Enregistrer le mouvement
+                            </button>
+                            
+                            <a href="{{ path('app_stock_index') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                        </div>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+            {# Aide contextuelle #}
+            <div class="card shadow mt-3">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>Aide
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h6>Types de mouvements:</h6>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3">
+                            <span class="badge bg-success">Entrée</span>
+                        </dt>
+                        <dd class="col-sm-9">
+                            Utilisé lors de la réception de marchandises, retours clients, ou corrections positives
+                        </dd>
+
+                        <dt class="col-sm-3">
+                            <span class="badge bg-danger">Sortie</span>
+                        </dt>
+                        <dd class="col-sm-9">
+                            Utilisé lors de ventes, pertes, produits périmés, ou corrections négatives
+                        </dd>
+
+                        <dt class="col-sm-3">
+                            <span class="badge bg-warning">Ajustement</span>
+                        </dt>
+                        <dd class="col-sm-9">
+                            Utilisé lors d'inventaires physiques pour corriger le stock à la valeur réelle comptée
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+// Afficher le stock actuel quand un produit est sélectionné
+document.addEventListener('DOMContentLoaded', function() {
+    const productSelect = document.querySelector('#stock_movement_product');
+    
+    if (productSelect) {
+        productSelect.addEventListener('change', function() {
+            // Vous pouvez ajouter ici un appel AJAX pour afficher le stock actuel
+            console.log('Produit sélectionné:', this.value);
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ user.email }}{% endblock %}
+
+{% block page_title %}
+    Détails de l'utilisateur
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <a href="{{ path('app_user_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+            </a>
+            <a href="{{ path('app_user_edit', {id: user.id}) }}" class="btn btn-warning">
+                <i class="fas fa-edit me-2"></i>Modifier
+            </a>
+            {% if user.id != app.user.id %}
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="fas fa-trash me-2"></i>Supprimer
+                </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Informations personnelles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Prénom:</th>
+                                    <td>{{ user.firstName ?? '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Nom:</th>
+                                    <td>{{ user.lastName ?? '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>
+                                        <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Téléphone:</th>
+                                    <td>
+                                        {% if user.phone %}
+                                            <a href="tel:{{ user.phone }}">{{ user.phone }}</a>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Rôles:</th>
+                                    <td>
+                                        {% if 'ROLE_ADMIN' in user.roles %}
+                                            <span class="badge bg-danger">Administrateur</span>
+                                        {% endif %}
+                                        <span class="badge bg-primary">Utilisateur</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Statut:</th>
+                                    <td>
+                                        {% if user.isActive %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle"></i> Actif
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times-circle"></i> Inactif
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Dernière connexion:</th>
+                                    <td>
+                                        {% if user.lastLoginAt %}
+                                            {{ user.lastLoginAt|date('d/m/Y à H:i') }}
+                                        {% else %}
+                                            <span class="text-muted">Jamais connecté</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>Permissions et sécurité
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>Permissions accordées:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i> Accès à l'application</li>
+                        {% if 'ROLE_ADMIN' in user.roles %}
+                        <li><i class="fas fa-check text-success me-2"></i> Gestion des produits</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Gestion des fournisseurs</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Gestion des utilisateurs</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Accès aux rapports</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Paramètres système</li>
+                        {% else %}
+                        <li><i class="fas fa-times text-muted me-2"></i> Gestion des produits (lecture seule)</li>
+                        <li><i class="fas fa-times text-muted me-2"></i> Gestion limitée</li>
+                        {% endif %}
+                    </ul>
+
+                    {% if user.id != app.user.id %}
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <form method="post" action="{{ path('app_user_toggle_active', {id: user.id}) }}" style="display: inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ user.id) }}">
+                            <button type="submit" class="btn btn-{{ user.isActive ? 'warning' : 'success' }}">
+                                <i class="fas fa-{{ user.isActive ? 'ban' : 'check' }} me-2"></i>
+                                {{ user.isActive ? 'Désactiver' : 'Activer' }} le compte
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations système
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>ID:</strong> {{ user.id }}</p>
+                    <p><strong>Créé le:</strong><br>{{ user.createdAt|date('d/m/Y à H:i') }}</p>
+                    {% if user.id == app.user.id %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            C'est votre compte
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Statistiques
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Statistiques d'activité à venir</p>
+                    {# TODO: Ajouter les statistiques d'activité #}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Modal de suppression #}
+{% if user.id != app.user.id %}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmer la suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>{{ user.email }}</strong> ?</p>
+                <p class="text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Cette action est irréversible et supprimera toutes les données associées.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form method="post" action="{{ path('app_user_delete', {id: user.id}) }}" style="display: inline;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Supprimer définitivement
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

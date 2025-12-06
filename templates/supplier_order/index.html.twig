@@ -1,0 +1,52 @@
+{# templates/supplier_order/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ page_title }}</h1>
+
+    {# Bouton pour créer une nouvelle commande fournisseur #}
+    <a href="{{ path('app_supplier_order_new') }}" class="btn btn-primary mb-3">
+        Nouvelle Commande
+    </a>
+
+    {# Tableau des commandes fournisseurs #}
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Fournisseur</th>
+                <th>Date de Commande</th>
+                <th>Statut</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.supplier.name }}</td>
+                    <td>{{ order.orderDate|date('d/m/Y') }}</td>
+                    <td>{{ order.status }}</td>
+                    <td>{{ order.total|number_format(2, ',', ' ') }} €</td>
+                    <td>
+                        <a href="{{ path('app_supplier_order_show', {'id': order.id}) }}" class="btn btn-sm btn-info">Voir</a>
+                        <a href="{{ path('app_supplier_order_edit', {'id': order.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                        <form action="{{ path('app_supplier_order_delete', {'id': order.id}) }}" method="post" style="display:inline-block;" onsubmit="return confirm('Êtes-vous sûr ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ order.id) }}">
+                            <button class="btn btn-sm btn-danger">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">Aucune commande fournisseur trouvée.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

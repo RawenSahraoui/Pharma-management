@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\SupplierRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -56,6 +58,17 @@ class Supplier
 
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
+
+    /**
+     * @var Collection<int, SupplierOrder>
+     */
+    #[ORM\OneToMany(mappedBy: 'supplier', targetEntity: SupplierOrder::class)]
+    private Collection $orderDate;
+
+    public function __construct()
+    {
+        $this->orderDate = new ArrayCollection();
+    }
 
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
@@ -216,5 +229,35 @@ class Supplier
     public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
+    }
+
+    /**
+     * @return Collection<int, SupplierOrder>
+     */
+    public function getOrderDate(): Collection
+    {
+        return $this->orderDate;
+    }
+
+    public function addOrderDate(SupplierOrder $orderDate): static
+    {
+        if (!$this->orderDate->contains($orderDate)) {
+            $this->orderDate->add($orderDate);
+            $orderDate->setSupplier($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrderDate(SupplierOrder $orderDate): static
+    {
+        if ($this->orderDate->removeElement($orderDate)) {
+            // set the owning side to null (unless already changed)
+            if ($orderDate->getSupplier() === $this) {
+                $orderDate->setSupplier(null);
+            }
+        }
+
+        return $this;
     }
 }

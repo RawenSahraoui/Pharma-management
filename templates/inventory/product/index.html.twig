@@ -135,12 +135,12 @@
                                        class="btn btn-warning" title="Modifier">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                   <form method="post" action="{{ path('app_product_delete', {id: product.id}) }}" style="display: inline;" onsubmit="return confirm('Supprimer ce produit ?');">
-    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
-    <button type="submit" class="btn btn-danger btn-sm">
-        <i class="fas fa-trash"></i>
-    </button>
-</form>
+                                    <button class="btn btn-danger btn-delete" 
+                                            data-id="{{ product.id }}" 
+                                            data-name="{{ product.name }}"
+                                            title="Supprimer">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>

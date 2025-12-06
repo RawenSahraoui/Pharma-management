@@ -1,0 +1,284 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-3">
+            {# Menu latéral #}
+            <div class="card shadow mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>Paramètres
+                    </h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="#general" class="list-group-item list-group-item-action active" data-bs-toggle="tab">
+                        <i class="fas fa-home me-2"></i>Général
+                    </a>
+                    <a href="#pharmacy" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                        <i class="fas fa-clinic-medical me-2"></i>Pharmacie
+                    </a>
+                    <a href="#stock" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                        <i class="fas fa-boxes me-2"></i>Gestion du stock
+                    </a>
+                    <a href="#notifications" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                        <i class="fas fa-bell me-2"></i>Notifications
+                    </a>
+                    <a href="#security" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                        <i class="fas fa-shield-alt me-2"></i>Sécurité
+                    </a>
+                    <a href="#backup" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                        <i class="fas fa-database me-2"></i>Sauvegarde
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="tab-content">
+                {# Général #}
+                <div class="tab-pane fade show active" id="general">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-home me-2"></i>Paramètres généraux
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="mb-3">
+                                    <label class="form-label">Nom de la pharmacie</label>
+                                    <input type="text" class="form-control" value="PharmaPro">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Adresse</label>
+                                    <textarea class="form-control" rows="2">Avenue Habib Bourguiba, Tunis</textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Téléphone</label>
+                                        <input type="tel" class="form-control" value="+216 71 123 456">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" value="contact@pharmapro.tn">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Devise</label>
+                                    <select class="form-select">
+                                        <option selected>TND - Dinar Tunisien</option>
+                                        <option>EUR - Euro</option>
+                                        <option>USD - Dollar</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Enregistrer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {# Pharmacie #}
+                <div class="tab-pane fade" id="pharmacy">
+                    <div class="card shadow">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-clinic-medical me-2"></i>Informations pharmacie
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="mb-3">
+                                    <label class="form-label">Numéro d'autorisation</label>
+                                    <input type="text" class="form-control" placeholder="Ex: PH-2024-001">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Pharmacien responsable</label>
+                                    <input type="text" class="form-control" placeholder="Dr. Mohamed Ben Ali">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Horaires d'ouverture</label>
+                                    <textarea class="form-control" rows="3">Lundi - Vendredi: 8h - 20h
+Samedi: 9h - 18h
+Dimanche: Fermé</textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-2"></i>Enregistrer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {# Gestion du stock #}
+                <div class="tab-pane fade" id="stock">
+                    <div class="card shadow">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="fas fa-boxes me-2"></i>Gestion du stock
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="autoAlert" checked>
+                                    <label class="form-check-label" for="autoAlert">
+                                        Alertes automatiques pour stock bas
+                                    </label>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Seuil d'alerte stock bas (jours)</label>
+                                    <input type="number" class="form-control" value="7">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Alerte péremption (jours avant)</label>
+                                    <input type="number" class="form-control" value="30">
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="autoRemove">
+                                    <label class="form-check-label" for="autoRemove">
+                                        Retirer automatiquement les produits périmés du stock
+                                    </label>
+                                </div>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-save me-2"></i>Enregistrer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {# Notifications #}
+                <div class="tab-pane fade" id="notifications">
+                    <div class="card shadow">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-bell me-2"></i>Notifications
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <h6>Email</h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="emailStock" checked>
+                                    <label class="form-check-label" for="emailStock">
+                                        Alertes stock bas
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="emailExpiry" checked>
+                                    <label class="form-check-label" for="emailExpiry">
+                                        Produits proches péremption
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="emailOrders">
+                                    <label class="form-check-label" for="emailOrders">
+                                        Nouvelles commandes
+                                    </label>
+                                </div>
+
+                                <h6>Application</h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="appAlerts" checked>
+                                    <label class="form-check-label" for="appAlerts">
+                                        Afficher les alertes dans l'application
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="appSound" checked>
+                                    <label class="form-check-label" for="appSound">
+                                        Sons de notification
+                                    </label>
+                                </div>
+
+                                <button type="submit" class="btn btn-info">
+                                    <i class="fas fa-save me-2"></i>Enregistrer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {# Sécurité #}
+                <div class="tab-pane fade" id="security">
+                    <div class="card shadow">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-shield-alt me-2"></i>Sécurité
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="mb-3">
+                                    <label class="form-label">Durée de session (minutes)</label>
+                                    <input type="number" class="form-control" value="60">
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="twoFactor">
+                                    <label class="form-check-label" for="twoFactor">
+                                        Activer l'authentification à deux facteurs
+                                    </label>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Politique de mot de passe</label>
+                                    <select class="form-select">
+                                        <option>Normale (6+ caractères)</option>
+                                        <option selected>Forte (8+ caractères avec symboles)</option>
+                                        <option>Très forte (12+ caractères complexes)</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-save me-2"></i>Enregistrer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {# Sauvegarde #}
+                <div class="tab-pane fade" id="backup">
+                    <div class="card shadow">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-database me-2"></i>Sauvegarde et restauration
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Dernière sauvegarde: <strong>{{ "now"|date('d/m/Y à H:i') }}</strong>
+                            </div>
+
+                            <h6>Sauvegarde automatique</h6>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="autoBackup" checked>
+                                <label class="form-check-label" for="autoBackup">
+                                    Activer les sauvegardes automatiques quotidiennes
+                                </label>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-download me-2"></i>Créer une sauvegarde maintenant
+                                </button>
+                                <button class="btn btn-success">
+                                    <i class="fas fa-upload me-2"></i>Restaurer une sauvegarde
+                                </button>
+                                <button class="btn btn-info">
+                                    <i class="fas fa-file-export me-2"></i>Exporter les données (CSV)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

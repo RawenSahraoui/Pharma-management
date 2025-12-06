@@ -1,0 +1,195 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Prescription {{ prescription.prescriptionNumber }} - PharmaPro{% endblock %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card shadow-sm">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-prescription me-2"></i> Prescription: {{ prescription.prescriptionNumber }}
+            </h5>
+            <div>
+                {% if prescription.status == 'pending' %}
+                    <span class="badge bg-warning text-dark">
+                        <i class="fas fa-clock"></i> En attente
+                    </span>
+                {% elseif prescription.status == 'prepared' %}
+                    <span class="badge bg-light text-dark">
+                        <i class="fas fa-check"></i> Préparée
+                    </span>
+                {% elseif prescription.status == 'delivered' %}
+                    <span class="badge bg-success">
+                        <i class="fas fa-check-circle"></i> Livrée
+                    </span>
+                {% elseif prescription.status == 'cancelled' %}
+                    <span class="badge bg-danger">
+                        <i class="fas fa-times-circle"></i> Annulée
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body">
+            {# Informations générales #}
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h6 class="text-muted">
+                        <i class="fas fa-user me-2"></i> Informations patient
+                    </h6>
+                    {% if prescription.customer %}
+                    <table class="table table-sm">
+                        <tr>
+                            <th width="30%">Nom:</th>
+                            <td>{{ prescription.customer.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ prescription.customer.email ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Téléphone:</th>
+                            <td>{{ prescription.customer.phone ?? '-' }}</td>
+                        </tr>
+                    </table>
+                    {% else %}
+                    <p class="text-muted">Aucun patient associé</p>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6">
+                    <h6 class="text-muted">
+                        <i class="fas fa-user-md me-2"></i> Informations médecin
+                    </h6>
+                    {% if prescription.doctor %}
+                    <table class="table table-sm">
+                        <tr>
+                            <th width="30%">Nom:</th>
+                            <td>{{ prescription.doctor.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Spécialité:</th>
+                            <td>{{ prescription.doctor.specialty ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Téléphone:</th>
+                            <td>{{ prescription.doctor.phone ?? '-' }}</td>
+                        </tr>
+                    </table>
+                    {% else %}
+                    <p class="text-muted">Aucun médecin associé</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h6 class="text-muted">
+                        <i class="fas fa-info-circle me-2"></i> Détails de la prescription
+                    </h6>
+                    <table class="table table-sm">
+                        <tr>
+                            <th width="15%">N° Prescription:</th>
+                            <td><strong>{{ prescription.prescriptionNumber }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Date:</th>
+                            <td>{{ prescription.prescriptionDate|date('d/m/Y') }}</td>
+                        </tr>
+                        {% if prescription.notes %}
+                        <tr>
+                            <th>Notes:</th>
+                            <td>{{ prescription.notes }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+
+            <hr>
+
+            {# Médicaments prescrits #}
+            <h6 class="mb-3">
+                <i class="fas fa-pills me-2"></i> Médicaments prescrits
+            </h6>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Médicament</th>
+                            <th width="10%">Quantité</th>
+                            <th width="20%">Posologie</th>
+                            <th width="30%">Instructions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in prescription.prescriptionItems %}
+                        <tr>
+                            <td>
+                                <strong>{{ item.product.name }}</strong>
+                                {% if item.product.reference %}
+                                    <br><small class="text-muted">Réf: {{ item.product.reference }}</small>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">{{ item.quantity }}</td>
+                            <td>
+                                {% if item.dosage %}
+                                    {{ item.dosage|nl2br }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.instructions %}
+                                    {{ item.instructions|nl2br }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">
+                                Aucun médicament prescrit
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {# Actions #}
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ path('app_prescription_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                </a>
+                <div>
+                    <button class="btn btn-outline-primary" onclick="window.print()">
+                        <i class="fas fa-print me-1"></i> Imprimer
+                    </button>
+                    <a href="{{ path('app_prescription_edit', {id: prescription.id}) }}" class="btn btn-warning">
+                        <i class="fas fa-edit me-1"></i> Modifier
+                    </a>
+                    <form method="post" 
+                          action="{{ path('app_prescription_delete', {id: prescription.id}) }}" 
+                          style="display: inline;"
+                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette prescription ?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ prescription.id) }}">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i> Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .btn, .card-header, nav { display: none !important; }
+    .card { border: none; box-shadow: none !important; }
+}
+</style>
+{% endblock %}

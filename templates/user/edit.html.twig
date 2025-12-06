@@ -1,0 +1,125 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ isNew ? 'Nouvel Utilisateur' : 'Modifier Utilisateur' }}{% endblock %}
+
+{% block page_title %}
+    {{ isNew ? 'Nouvel Utilisateur' : 'Modifier l\'Utilisateur' }}
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <a href="{{ path('app_user_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-{{ isNew ? 'plus' : 'edit' }} me-2"></i>
+                        {{ isNew ? 'Créer un nouvel utilisateur' : 'Modifier l\'utilisateur' }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                    
+                    <div class="row">
+                        {# Informations personnelles #}
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-user me-2"></i>Informations personnelles
+                            </h6>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.firstName) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.lastName) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.email) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.phone) }}
+                            </div>
+                        </div>
+
+                        {# Sécurité et rôles #}
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-shield-alt me-2"></i>Sécurité et permissions
+                            </h6>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.plainPassword) }}
+                                {% if not isNew %}
+                                    <small class="text-muted">
+                                        Laissez vide pour conserver le mot de passe actuel
+                                    </small>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">{{ form_label(form.roles) }}</label>
+                                {{ form_widget(form.roles) }}
+                                <small class="text-muted d-block mt-1">
+                                    <i class="fas fa-info-circle"></i> L'utilisateur aura toujours au minimum le rôle ROLE_USER
+                                </small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    {{ form_widget(form.isActive) }}
+                                    {{ form_label(form.isActive) }}
+                                </div>
+                                <small class="text-muted">
+                                    Les utilisateurs inactifs ne peuvent pas se connecter
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    {# Boutons #}
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>
+                                {{ isNew ? 'Créer l\'utilisateur' : 'Enregistrer les modifications' }}
+                            </button>
+                            
+                            <a href="{{ path('app_user_index') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                            
+                            {% if not isNew %}
+                                <a href="{{ path('app_user_show', {id: user.id}) }}" class="btn btn-info btn-lg">
+                                    <i class="fas fa-eye me-2"></i>Voir l'utilisateur
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+            {% if isNew %}
+            <div class="alert alert-info mt-3">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Note:</strong> L'utilisateur recevra un email de bienvenue avec ses identifiants.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

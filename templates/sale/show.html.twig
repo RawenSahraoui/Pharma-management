@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Vente{% endblock %}
+
+{% block body %}
+<h1>Détails de la Vente</h1>
+
+<ul>
+    <li><strong>ID:</strong> {{ sale.id }}</li>
+    <li><strong>Produit:</strong> {{ sale.product.name }}</li>
+    <li><strong>Quantité:</strong> {{ sale.quantity }}</li>
+    <li><strong>Total (€):</strong> {{ sale.total }}</li>
+    <li><strong>Date:</strong> {{ sale.saleDate|date('Y-m-d H:i') }}</li>
+</ul>
+
+<a href="{{ path('app_sale_index') }}" class="btn btn-secondary">Retour</a>
+<a href="{{ path('app_sale_edit', {'id': sale.id}) }}" class="btn btn-warning">Modifier</a>
+{% endblock %}

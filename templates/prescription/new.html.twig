@@ -1,0 +1,141 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Prescription - PharmaPro{% endblock %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-plus-circle me-2"></i> Créer une nouvelle prescription
+            </h5>
+        </div>
+        <div class="card-body">
+            {{ form_start(form) }}
+            
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    {{ form_row(form.prescriptionNumber) }}
+                </div>
+                <div class="col-md-3">
+                    {{ form_row(form.prescriptionDate) }}
+                </div>
+                <div class="col-md-3">
+                    {{ form_row(form.customer) }}
+                </div>
+                <div class="col-md-3">
+                    {{ form_row(form.doctor) }}
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    {{ form_row(form.status) }}
+                </div>
+                <div class="col-md-9">
+                    {{ form_row(form.notes) }}
+                </div>
+            </div>
+
+            <hr>
+
+            <h6 class="mb-3">
+                <i class="fas fa-pills me-2"></i> Médicaments prescrits
+            </h6>
+
+            <div class="prescription-items-container" data-prototype="{{ form_widget(form.prescriptionItems.vars.prototype)|e('html_attr') }}">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="30%">Médicament</th>
+                            <th width="15%">Quantité</th>
+                            <th width="20%">Posologie</th>
+                            <th width="30%">Instructions</th>
+                            <th width="5%"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="prescription-items-list">
+                        {% for item in form.prescriptionItems %}
+                        <tr class="prescription-item-row">
+                            <td>{{ form_widget(item.product) }}</td>
+                            <td>{{ form_widget(item.quantity) }}</td>
+                            <td>{{ form_widget(item.dosage) }}</td>
+                            <td>{{ form_widget(item.instructions) }}</td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm remove-item">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <button type="button" class="btn btn-outline-primary" id="add-item">
+                    <i class="fas fa-plus me-1"></i> Ajouter un médicament
+                </button>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ path('app_prescription_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Retour
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save me-1"></i> Enregistrer la prescription
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let itemIndex = {{ form.prescriptionItems|length }};
+    const container = document.querySelector('.prescription-items-container');
+    const listContainer = document.getElementById('prescription-items-list');
+
+    // Add new item
+    document.getElementById('add-item').addEventListener('click', function() {
+        const prototype = container.dataset.prototype;
+        const newForm = prototype.replace(/__name__/g, itemIndex);
+        itemIndex++;
+
+        const row = document.createElement('tr');
+        row.className = 'prescription-item-row';
+        
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = newForm;
+        
+        const productWidget = tempDiv.querySelector('[id$="_product"]').parentElement.innerHTML;
+        const quantityWidget = tempDiv.querySelector('[id$="_quantity"]').parentElement.innerHTML;
+        const dosageWidget = tempDiv.querySelector('[id$="_dosage"]').parentElement.innerHTML;
+        const instructionsWidget = tempDiv.querySelector('[id$="_instructions"]').parentElement.innerHTML;
+        
+        row.innerHTML = `
+            <td>${productWidget}</td>
+            <td>${quantityWidget}</td>
+            <td>${dosageWidget}</td>
+            <td>${instructionsWidget}</td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm remove-item">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        
+        listContainer.appendChild(row);
+    });
+
+    // Remove item
+    listContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-item')) {
+            e.target.closest('tr').remove();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ customer.name }} - PharmaPro{% endblock %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i> {{ customer.name }}
+                    </h5>
+                    {% if customer.isActive %}
+                        <span class="badge bg-success">
+                            <i class="fas fa-check-circle"></i> Actif
+                        </span>
+                    {% else %}
+                        <span class="badge bg-secondary">
+                            <i class="fas fa-times-circle"></i> Inactif
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-info-circle"></i> Informations personnelles
+                            </h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th width="40%">ID:</th>
+                                    <td>{{ customer.id }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Nom complet:</th>
+                                    <td><strong>{{ customer.name }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>
+                                        {% if customer.email %}
+                                            <a href="mailto:{{ customer.email }}">{{ customer.email }}</a>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Téléphone:</th>
+                                    <td>
+                                        {% if customer.phone %}
+                                            <a href="tel:{{ customer.phone }}">{{ customer.phone }}</a>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-map-marker-alt"></i> Adresse
+                            </h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th width="40%">Adresse:</th>
+                                    <td>{{ customer.address ?? '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Ville:</th>
+                                    <td>{{ customer.city ?? '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Code postal:</th>
+                                    <td>{{ customer.postalCode ?? '-' }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    {# Historique des ventes (optionnel) #}
+                    {% if customer.sales is defined and customer.sales|length > 0 %}
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-shopping-cart"></i> Historique des achats
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>N° Facture</th>
+                                            <th>Montant</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for sale in customer.sales|slice(0, 5) %}
+                                        <tr>
+                                            <td>{{ sale.saleDate|date('d/m/Y') }}</td>
+                                            <td>{{ sale.invoiceNumber }}</td>
+                                            <td>{{ sale.totalAmount|number_format(3, '.', ' ') }} TND</td>
+                                            <td>
+                                                <a href="{{ path('app_sale_show', {id: sale.id}) }}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% if customer.sales|length > 5 %}
+                            <p class="text-muted text-center">
+                                <small>Affichage des 5 dernières ventes sur {{ customer.sales|length }} au total</small>
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ path('app_patient_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                        </a>
+                        <div>
+                            <a href="{{ path('app_patient_edit', {id: customer.id}) }}" class="btn btn-warning">
+                                <i class="fas fa-edit me-1"></i> Modifier
+                            </a>
+                            <form method="post" 
+                                  action="{{ path('app_patient_delete', {id: customer.id}) }}" 
+                                  style="display: inline;"
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce patient ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ customer.id) }}">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash me-1"></i> Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

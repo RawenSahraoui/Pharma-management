@@ -1,0 +1,181 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Vente - PharmaPro{% endblock %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-plus-circle me-2"></i> Créer une nouvelle vente
+            </h5>
+        </div>
+        <div class="card-body">
+            {{ form_start(form) }}
+            
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    {{ form_row(form.invoiceNumber) }}
+                </div>
+                <div class="col-md-4">
+                    {{ form_row(form.saleDate) }}
+                </div>
+                <div class="col-md-4">
+                    {{ form_row(form.customer) }}
+                </div>
+            </div>
+
+            <hr>
+
+            <h6 class="mb-3">
+                <i class="fas fa-list me-2"></i> Articles de la vente
+            </h6>
+
+            <div class="sale-items-container" data-prototype="{{ form_widget(form.saleItems.vars.prototype)|e('html_attr') }}">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="40%">Produit</th>
+                            <th width="20%">Quantité</th>
+                            <th width="20%">Prix unitaire</th>
+                            <th width="15%">Sous-total</th>
+                            <th width="5%"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="sale-items-list">
+                        {% for item in form.saleItems %}
+                        <tr class="sale-item-row">
+                            <td>{{ form_widget(item.product) }}</td>
+                            <td>{{ form_widget(item.quantity) }}</td>
+                            <td>{{ form_widget(item.unitPrice) }}</td>
+                            <td class="subtotal-cell">
+                                <span class="subtotal badge bg-secondary">0.000 TND</span>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm remove-item">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <button type="button" class="btn btn-outline-primary" id="add-item">
+                    <i class="fas fa-plus me-1"></i> Ajouter un article
+                </button>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-8"></div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="text-end">
+                                Total: <span id="total-amount" class="text-success">0.000 TND</span>
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ path('app_sale_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Retour
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save me-1"></i> Enregistrer la vente
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let itemIndex = {{ form.saleItems|length }};
+    const container = document.querySelector('.sale-items-container');
+    const listContainer = document.getElementById('sale-items-list');
+
+    // Add new item
+    document.getElementById('add-item').addEventListener('click', function() {
+        const prototype = container.dataset.prototype;
+        const newForm = prototype.replace(/__name__/g, itemIndex);
+        itemIndex++;
+
+        const row = document.createElement('tr');
+        row.className = 'sale-item-row';
+        row.innerHTML = newForm.replace(/sale_saleItems_\d+/g, function(match) {
+            return match;
+        });
+        
+        const cells = `
+            <td class="subtotal-cell">
+                <span class="subtotal badge bg-secondary">0.000 TND</span>
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm remove-item">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        
+        row.innerHTML = row.innerHTML.replace(/<\/tr>/, cells + '</tr>');
+        listContainer.appendChild(row);
+        
+        attachEventListeners(row);
+    });
+
+    // Remove item
+    listContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-item')) {
+            e.target.closest('tr').remove();
+            calculateTotal();
+        }
+    });
+
+    // Calculate subtotals and total
+    function attachEventListeners(row) {
+        const qtyInput = row.querySelector('.quantity-input');
+        const priceInput = row.querySelector('.unit-price-input');
+        
+        if (qtyInput && priceInput) {
+            qtyInput.addEventListener('input', () => updateSubtotal(row));
+            priceInput.addEventListener('input', () => updateSubtotal(row));
+        }
+    }
+
+    function updateSubtotal(row) {
+        const qty = parseFloat(row.querySelector('.quantity-input')?.value) || 0;
+        const price = parseFloat(row.querySelector('.unit-price-input')?.value) || 0;
+        const subtotal = qty * price;
+        
+        const subtotalSpan = row.querySelector('.subtotal');
+        if (subtotalSpan) {
+            subtotalSpan.textContent = subtotal.toFixed(3) + ' TND';
+        }
+        
+        calculateTotal();
+    }
+
+    function calculateTotal() {
+        let total = 0;
+        document.querySelectorAll('.sale-item-row').forEach(row => {
+            const qty = parseFloat(row.querySelector('.quantity-input')?.value) || 0;
+            const price = parseFloat(row.querySelector('.unit-price-input')?.value) || 0;
+            total += qty * price;
+        });
+        
+        document.getElementById('total-amount').textContent = total.toFixed(3) + ' TND';
+    }
+
+    // Initialize existing items
+    document.querySelectorAll('.sale-item-row').forEach(attachEventListeners);
+    calculateTotal();
+});
+</script>
+{% endblock %}

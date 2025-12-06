@@ -1,0 +1,42 @@
+{# templates/supplier_order/show.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1>{{ page_title }}</h1>
+
+    <table class="table table-bordered">
+        <tr>
+            <th>ID</th>
+            <td>{{ order.id }}</td>
+        </tr>
+        <tr>
+            <th>Fournisseur</th>
+            <td>{{ order.supplier.name }}</td>
+        </tr>
+        <tr>
+            <th>Date de commande</th>
+            <td>{{ order.orderDate|date('d/m/Y') }}</td>
+        </tr>
+        <tr>
+            <th>Statut</th>
+            <td>{{ order.status }}</td>
+        </tr>
+        <tr>
+            <th>Total</th>
+            <td>{{ order.total|number_format(2, ',', ' ') }} €</td>
+        </tr>
+    </table>
+
+    <a href="{{ path('app_supplier_order_edit', {'id': order.id}) }}" class="btn btn-warning">Modifier</a>
+
+    <form action="{{ path('app_supplier_order_delete', {'id': order.id}) }}" method="post" style="display:inline-block;" onsubmit="return confirm('Êtes-vous sûr ?');">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ order.id) }}">
+        <button class="btn btn-danger">Supprimer</button>
+    </form>
+
+    <a href="{{ path('app_supplier_order_index') }}" class="btn btn-secondary">Retour à la liste</a>
+</div>
+{% endblock %}
