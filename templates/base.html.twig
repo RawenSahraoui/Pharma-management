@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestion Pharmacie{% endblock %}</title>
+    
+    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    
+    {# Bootstrap 5 CSS #}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    {# Bootstrap Icons #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    {# Font Awesome #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    {# DataTables CSS #}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    
+    {# Select2 CSS #}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+    {# Toastr CSS pour les notifications #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    
+    {% block stylesheets %}
+        {{ encore_entry_link_tags('app') }}
+    {% endblock %}
+    
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #0dcaf0;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .sidebar-menu .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu .nav-link:hover,
+        .sidebar-menu .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .sidebar-menu .nav-link i {
+            width: 25px;
+            margin-right: 10px;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: white;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content {
+            padding: 2rem 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .badge-low-stock {
+            background-color: var(--warning-color);
+        }
+
+        .badge-out-stock {
+            background-color: var(--danger-color);
+        }
+
+        .badge-expired {
+            background-color: var(--danger-color);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% if app.user %}
+        {# Sidebar #}
+        <nav class="sidebar">
+            <div class="sidebar-brand">
+                <i class="fas fa-prescription-bottle-alt"></i>
+                PharmaPro
+            </div>
+            
+            <div class="sidebar-menu">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_dashboard' ? 'active' : '' }}" 
+                           href="{{ path('app_dashboard') }}">
+                            <i class="fas fa-home"></i>
+                            Tableau de bord
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item mt-3">
+                        <small class="text-white-50 px-3">GESTION STOCKS</small>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_product' ? 'active' : '' }}" 
+                           href="{{ path('app_product_index') }}">
+                            <i class="fas fa-pills"></i>
+                            Produits
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_stock' ? 'active' : '' }}" 
+                           href="{{ path('app_stock_index') }}">
+                            <i class="fas fa-boxes"></i>
+                            Mouvements Stock
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_expiry' ? 'active' : '' }}" 
+                           href="{{ path('app_expiry_index') }}">
+                            <i class="fas fa-calendar-times"></i>
+                            Produits Périmés
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item mt-3">
+                        <small class="text-white-50 px-3">FOURNISSEURS</small>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_supplier' and 'order' not in app.request.get('_route') ? 'active' : '' }}" 
+                           href="{{ path('app_supplier_index') }}">
+                            <i class="fas fa-truck"></i>
+                            Fournisseurs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_supplier_order' ? 'active' : '' }}" 
+                           href="{{ path('app_supplier_order_index') }}">
+                            <i class="fas fa-shopping-cart"></i>
+                            Commandes
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item mt-3">
+                        <small class="text-white-50 px-3">VENTES</small>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_pos' ? 'active' : '' }}" 
+                           href="{{ path('app_pos_index') }}">
+                            <i class="fas fa-cash-register"></i>
+                            Point de Vente
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_sale' ? 'active' : '' }}" 
+                           href="{{ path('app_sale_index') }}">
+                            <i class="fas fa-receipt"></i>
+                            Historique Ventes
+                        </a>
+                    </li>
+                    
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <li class="nav-item mt-3">
+                        <small class="text-white-50 px-3">PRESCRIPTIONS</small>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_prescription' ? 'active' : '' }}" 
+                           href="{{ path('app_prescription_index') }}">
+                            <i class="fas fa-file-prescription"></i>
+                            Prescriptions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_patient' ? 'active' : '' }}" 
+                           href="{{ path('app_patient_index') }}">
+                            <i class="fas fa-user-injured"></i>
+                            Patients
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="nav-item mt-3">
+                        <small class="text-white-50 px-3">RAPPORTS</small>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_report' ? 'active' : '' }}" 
+                           href="{{ path('app_report_index') }}">
+                            <i class="fas fa-chart-bar"></i>
+                            Rapports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_alert' ? 'active' : '' }}" 
+                           href="{{ path('app_alert_index') }}">
+                            <i class="fas fa-bell"></i>
+                            Alertes
+                        </a>
+                    </li>
+                    
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <li class="nav-item mt-3">
+                        <small class="text-white-50 px-3">ADMINISTRATION</small>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_user' ? 'active' : '' }}" 
+                           href="{{ path('app_user_index') }}">
+                            <i class="fas fa-users"></i>
+                            Utilisateurs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ app.request.get('_route') starts with 'app_settings' ? 'active' : '' }}" 
+                           href="{{ path('app_settings_index') }}">
+                            <i class="fas fa-cog"></i>
+                            Paramètres
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+
+        {# Main Content #}
+        <div class="main-content">
+            {# Top Bar #}
+            <div class="topbar">
+                <div>
+                    <button class="btn btn-link d-md-none" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h5 class="mb-0 d-inline-block">{% block page_title %}{% endblock %}</h5>
+                </div>
+                
+                <div class="d-flex align-items-center gap-3">
+                    {# Notifications #}
+                    <div class="dropdown">
+                        <button class="btn btn-link text-dark position-relative" type="button" 
+                                data-bs-toggle="dropdown">
+                            <i class="fas fa-bell fs-5"></i>
+                            {% if app.user.unreadNotificationCount > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ app.user.unreadNotificationCount }}
+                                </span>
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" style="min-width: 300px;">
+                            <li><h6 class="dropdown-header">Notifications</h6></li>
+                            {# Liste des notifications #}
+                            <li><a class="dropdown-item" href="{{ path('app_notification_index') }}">
+                                Voir toutes les notifications
+                            </a></li>
+                        </ul>
+                    </div>
+                    
+                    {# User Menu #}
+                    <div class="dropdown">
+                        <button class="btn btn-link text-dark" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle fs-5"></i>
+                            {{ app.user.fullName }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ path('app_profile') }}">
+                                <i class="fas fa-user me-2"></i> Mon Profil
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ path('app_settings') }}">
+                                <i class="fas fa-cog me-2"></i> Paramètres
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ path('app_logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            {# Content Area #}
+            <div class="content">
+                {# Flash Messages #}
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                {% block body %}{% endblock %}
+            </div>
+        </div>
+    {% else %}
+        {# Login Page #}
+        {% block login_content %}{% endblock %}
+    {% endif %}
+
+    {# jQuery #}
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    
+    {# Bootstrap 5 JS #}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {# DataTables JS #}
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    
+    {# Select2 JS #}
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    {# Toastr JS #}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    
+    {# Chart.js #}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    {% block javascripts %}
+        {{ encore_entry_script_tags('app') }}
+    {% endblock %}
+    
+    <script>
+        // Toggle sidebar on mobile
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('show');
+        });
+
+        // Initialize DataTables
+        $(document).ready(function() {
+            $('.datatable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+                }
+            });
+        });
+
+        // Initialize Select2
+        $('.select2').select2({
+            theme: 'bootstrap-5'
+        });
+
+        // Toastr configuration
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            timeOut: 5000
+        };
+    </script>
+</body>
+</html>

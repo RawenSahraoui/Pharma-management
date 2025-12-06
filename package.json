@@ -1,0 +1,61 @@
+{
+  "name": "pharma-management",
+  "version": "1.0.0",
+  "description": "Système de gestion de pharmacie moderne",
+  "main": "index.js",
+  "scripts": {
+    "dev-server": "encore dev-server",
+    "dev": "encore dev",
+    "watch": "encore dev --watch",
+    "build": "encore production --progress",
+    "lint": "eslint assets/js",
+    "lint:fix": "eslint assets/js --fix"
+  },
+  "keywords": [
+    "pharmacy",
+    "pos",
+    "inventory",
+    "symfony"
+  ],
+  "author": "PharmaPro Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "@hotwired/stimulus": "^3.2.0",
+    "@symfony/stimulus-bridge": "^3.2.0",
+    "@symfony/webpack-encore": "^4.5.0",
+    "autoprefixer": "^10.4.0",
+    "core-js": "^3.33.0",
+    "css-loader": "^6.8.0",
+    "eslint": "^8.52.0",
+    "file-loader": "^6.2.0",
+    "postcss": "^8.4.0",
+    "postcss-loader": "^7.3.0",
+    "regenerator-runtime": "^0.14.0",
+    "sass": "^1.69.0",
+    "sass-loader": "^13.3.0",
+    "style-loader": "^3.3.0",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.0",
+    "webpack-notifier": "^1.15.0"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.2",
+    "@popperjs/core": "^2.11.8",
+    "jquery": "^3.7.1",
+    "datatables.net": "^1.13.6",
+    "datatables.net-bs5": "^1.13.6",
+    "select2": "^4.1.0-rc.0",
+    "toastr": "^2.1.4",
+    "chart.js": "^4.4.0",
+    "sweetalert2": "^11.9.0",
+    "moment": "^2.29.4",
+    "font-awesome": "^4.7.0",
+    "@fortawesome/fontawesome-free": "^6.4.2",
+    "bootstrap-icons": "^1.11.1",
+    "quagga": "^0.12.1",
+    "axios": "^1.6.0",
+    "lodash": "^4.17.21"
+  }
+}

@@ -1,0 +1,96 @@
+security:
+    # Configuration du hashing des mots de passe
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    # Fournisseurs d'utilisateurs
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    # Pare-feu de sécurité
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        main:
+            lazy: true
+            provider: app_user_provider
+            
+            # Authentification par formulaire
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                enable_csrf: true
+                default_target_path: app_dashboard
+                always_use_default_target_path: false
+                use_referer: true
+
+            # Déconnexion
+            logout:
+                path: app_logout
+                target: app_login
+
+            # Remember me
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800 # 1 semaine
+                path: /
+                always_remember_me: false
+
+            # Gestion des tentatives de connexion
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
+
+    # Contrôle d'accès
+    access_control:
+        # Pages publiques
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/reset-password, roles: PUBLIC_ACCESS }
+        
+        # API publique (si nécessaire)
+        - { path: ^/api/public, roles: PUBLIC_ACCESS }
+        
+        # Toutes les autres routes nécessitent une authentification
+        - { path: ^/, roles: ROLE_USER }
+        
+        # Administration
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/user/manage, roles: ROLE_ADMIN }
+        - { path: ^/settings, roles: ROLE_ADMIN }
+        
+        # Gestion des stocks (Gestionnaire ou Admin)
+        - { path: ^/inventory/product/new, roles: ROLE_MANAGER }
+        - { path: ^/inventory/product/.*/edit, roles: ROLE_MANAGER }
+        - { path: ^/inventory/product/.*/delete, roles: ROLE_ADMIN }
+        
+        # Point de vente (Caissier ou supérieur)
+        - { path: ^/sales/pos, roles: ROLE_CASHIER }
+        
+        # Rapports (Manager ou Admin)
+        - { path: ^/report, roles: ROLE_MANAGER }
+        
+        # Fournisseurs (Manager ou Admin)
+        - { path: ^/supplier/order/.*/delete, roles: ROLE_ADMIN }
+
+    # Hiérarchie des rôles
+    role_hierarchy:
+        ROLE_CASHIER: ROLE_USER
+        ROLE_PHARMACIST: [ROLE_CASHIER, ROLE_USER]
+        ROLE_MANAGER: [ROLE_PHARMACIST, ROLE_CASHIER, ROLE_USER]
+        ROLE_ADMIN: [ROLE_MANAGER, ROLE_PHARMACIST, ROLE_CASHIER, ROLE_USER]
+        ROLE_SUPER_ADMIN: [ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
+
+when@test:
+    security:
+        password_hashers:
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 4
+                time_cost: 3
+                memory_cost: 10

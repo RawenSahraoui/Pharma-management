@@ -1,0 +1,657 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Point de Vente - PharmaPro{% endblock %}
+
+{% block page_title %}Point de Vente{% endblock %}
+
+{% block body %}
+<div class="pos-container">
+    <div class="row g-3">
+        {# Colonne de gauche - Produits #}
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-search me-2"></i>Recherche Produits</h5>
+                </div>
+                <div class="card-body">
+                    {# Barre de recherche #}
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                            <input type="text" class="form-control form-control-lg" 
+                                   id="searchInput" 
+                                   placeholder="Scanner code-barres ou rechercher un produit..." 
+                                   autocomplete="off">
+                            <button class="btn btn-primary" type="button" id="scannerBtn">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    {# Résultats de recherche #}
+                    <div id="searchResults" class="search-results mb-3" style="display: none;">
+                        <div class="list-group" id="productsList"></div>
+                    </div>
+
+                    {# Catégories rapides #}
+                    <div class="quick-categories mb-3">
+                        <button class="btn btn-outline-primary btn-sm me-2 mb-2" data-category="all">
+                            Tous
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm me-2 mb-2" data-category="medicaments">
+                            Médicaments
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm me-2 mb-2" data-category="parapharmacie">
+                            Parapharmacie
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm me-2 mb-2" data-category="materiel">
+                            Matériel médical
+                        </button>
+                    </div>
+
+                    {# Panier d'articles #}
+                    <div class="cart-items">
+                        <h6 class="border-bottom pb-2 mb-3">Articles dans le panier</h6>
+                        <div id="cartItems">
+                            <div class="text-center text-muted py-5">
+                                <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                                <p>Le panier est vide. Commencez à scanner des produits.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Colonne de droite - Caisse #}
+        <div class="col-lg-5">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Total de la vente</h5>
+                </div>
+                <div class="card-body">
+                    {# Informations client #}
+                    <div class="customer-info mb-3">
+                        <div class="mb-2">
+                            <label class="form-label small">Nom du client (optionnel)</label>
+                            <input type="text" class="form-control" id="customerName" 
+                                   placeholder="Nom du client">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small">Téléphone (optionnel)</label>
+                            <input type="text" class="form-control" id="customerPhone" 
+                                   placeholder="Téléphone">
+                        </div>
+                    </div>
+
+                    {# Calculs #}
+                    <div class="calculation-area">
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr>
+                                    <td>Sous-total:</td>
+                                    <td class="text-end"><strong id="subtotal">0.00 TND</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>TVA:</td>
+                                    <td class="text-end"><strong id="taxAmount">0.00 TND</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Remise:
+                                        <input type="number" class="form-control form-control-sm d-inline-block" 
+                                               id="discountPercent" 
+                                               min="0" max="100" value="0" 
+                                               style="width: 70px;">%
+                                    </td>
+                                    <td class="text-end"><strong id="discountAmount">0.00 TND</strong></td>
+                                </tr>
+                                <tr class="table-success">
+                                    <td><h5 class="mb-0">TOTAL:</h5></td>
+                                    <td class="text-end">
+                                        <h4 class="mb-0 text-success" id="totalAmount">0.00 TND</h4>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <hr>
+
+                    {# Méthode de paiement #}
+                    <div class="payment-method mb-3">
+                        <label class="form-label">Méthode de paiement</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="paymentMethod" 
+                                   id="cashPayment" value="cash" checked>
+                            <label class="btn btn-outline-primary" for="cashPayment">
+                                <i class="fas fa-money-bill-wave"></i> Espèces
+                            </label>
+
+                            <input type="radio" class="btn-check" name="paymentMethod" 
+                                   id="cardPayment" value="card">
+                            <label class="btn btn-outline-primary" for="cardPayment">
+                                <i class="fas fa-credit-card"></i> Carte
+                            </label>
+
+                            <input type="radio" class="btn-check" name="paymentMethod" 
+                                   id="mobilePayment" value="mobile">
+                            <label class="btn btn-outline-primary" for="mobilePayment">
+                                <i class="fas fa-mobile-alt"></i> Mobile
+                            </label>
+                        </div>
+                    </div>
+
+                    {# Montant payé #}
+                    <div class="mb-3" id="cashPaymentSection">
+                        <label class="form-label">Montant payé</label>
+                        <input type="number" class="form-control form-control-lg" 
+                               id="amountPaid" 
+                               step="0.01" 
+                               min="0" 
+                               placeholder="Montant payé">
+                        <div class="alert alert-info mt-2" id="changeAmount" style="display: none;">
+                            <strong>Monnaie à rendre:</strong> <span id="changeValue">0.00 TND</span>
+                        </div>
+                    </div>
+
+                    {# Référence de paiement (pour carte/mobile) #}
+                    <div class="mb-3" id="paymentReferenceSection" style="display: none;">
+                        <label class="form-label">Référence de paiement</label>
+                        <input type="text" class="form-control" 
+                               id="paymentReference" 
+                               placeholder="Numéro de transaction">
+                    </div>
+
+                    {# Notes #}
+                    <div class="mb-3">
+                        <label class="form-label small">Notes (optionnel)</label>
+                        <textarea class="form-control" id="saleNotes" rows="2" 
+                                  placeholder="Notes sur la vente..."></textarea>
+                    </div>
+
+                    {# Boutons d'action #}
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success btn-lg" id="processSaleBtn" disabled>
+                            <i class="fas fa-check-circle me-2"></i>
+                            Valider la vente
+                        </button>
+                        <button class="btn btn-outline-danger" id="clearCartBtn">
+                            <i class="fas fa-trash me-2"></i>
+                            Vider le panier
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {# Raccourcis clavier #}
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Raccourcis clavier</h6>
+                    <ul class="list-unstyled small mb-0">
+                        <li><kbd>F1</kbd> - Aide</li>
+                        <li><kbd>F2</kbd> - Recherche produit</li>
+                        <li><kbd>F3</kbd> - Scanner</li>
+                        <li><kbd>F9</kbd> - Vider panier</li>
+                        <li><kbd>F12</kbd> - Valider vente</li>
+                        <li><kbd>Esc</kbd> - Annuler</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Modal de confirmation #}
+<div class="modal fade" id="confirmSaleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Vente validée avec succès!</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fas fa-check-circle text-success fa-4x mb-3"></i>
+                <h4>Vente N° <span id="saleNumber"></span></h4>
+                <p class="mb-0">Total: <strong id="saleTotal"></strong></p>
+                <p>Monnaie: <strong id="saleChange"></strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="printReceiptBtn">
+                    <i class="fas fa-print me-2"></i>Imprimer le reçu
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="newSaleBtn">
+                    Nouvelle vente
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.pos-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.cart-items {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.cart-item {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+}
+
+.cart-item:hover {
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.search-results {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+}
+
+.product-item {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.product-item:hover {
+    background-color: #e9ecef;
+}
+
+.quantity-controls button {
+    width: 35px;
+    height: 35px;
+    padding: 0;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .receipt, .receipt * {
+        visibility: visible;
+    }
+    .receipt {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 80mm;
+    }
+}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+const POS = {
+    cart: [],
+    
+    init() {
+        this.bindEvents();
+        this.setupKeyboardShortcuts();
+        this.focusSearch();
+    },
+    
+    bindEvents() {
+        // Recherche de produits
+        $('#searchInput').on('input', () => this.searchProducts());
+        
+        // Scanner
+        $('#scannerBtn').on('click', () => this.activateScanner());
+        
+        // Catégories
+        $('.quick-categories button').on('click', function() {
+            $('.quick-categories button').removeClass('active');
+            $(this).addClass('active');
+            // TODO: Filtrer par catégorie
+        });
+        
+        // Méthode de paiement
+        $('input[name="paymentMethod"]').on('change', function() {
+            POS.updatePaymentMethod($(this).val());
+        });
+        
+        // Montant payé
+        $('#amountPaid').on('input', () => this.calculateChange());
+        
+        // Remise
+        $('#discountPercent').on('input', () => this.updateTotals());
+        
+        // Boutons
+        $('#processSaleBtn').on('click', () => this.processSale());
+        $('#clearCartBtn').on('click', () => this.clearCart());
+        $('#newSaleBtn').on('click', () => this.newSale());
+        $('#printReceiptBtn').on('click', () => this.printReceipt());
+    },
+    
+    setupKeyboardShortcuts() {
+        $(document).on('keydown', function(e) {
+            if (e.key === 'F2') {
+                e.preventDefault();
+                $('#searchInput').focus();
+            } else if (e.key === 'F3') {
+                e.preventDefault();
+                $('#scannerBtn').click();
+            } else if (e.key === 'F9') {
+                e.preventDefault();
+                POS.clearCart();
+            } else if (e.key === 'F12') {
+                e.preventDefault();
+                if (!$('#processSaleBtn').prop('disabled')) {
+                    POS.processSale();
+                }
+            } else if (e.key === 'Escape') {
+                $('#searchResults').hide();
+            }
+        });
+    },
+    
+    focusSearch() {
+        $('#searchInput').focus();
+    },
+    
+    searchProducts() {
+        const query = $('#searchInput').val();
+        
+        if (query.length < 2) {
+            $('#searchResults').hide();
+            return;
+        }
+        
+        $.ajax({
+            url: '{{ path("app_pos_search_product") }}',
+            data: { q: query },
+            success: (products) => {
+                this.displaySearchResults(products);
+            }
+        });
+    },
+    
+    displaySearchResults(products) {
+        const $list = $('#productsList').empty();
+        
+        if (products.length === 0) {
+            $list.append('<div class="list-group-item">Aucun produit trouvé</div>');
+        } else {
+            products.forEach(product => {
+                const stockBadge = product.stock <= 0 ? 
+                    '<span class="badge bg-danger">Rupture</span>' :
+                    product.isLowStock ? 
+                    '<span class="badge bg-warning">Stock bas</span>' : 
+                    `<span class="badge bg-success">${product.stock}</span>`;
+                
+                const $item = $(`
+                    <a href="#" class="list-group-item list-group-item-action product-item" 
+                       data-product='${JSON.stringify(product)}'>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">${product.name}</h6>
+                                <small class="text-muted">${product.barcode} | ${product.category}</small>
+                                ${product.requiresPrescription ? '<span class="badge bg-info">Prescription</span>' : ''}
+                            </div>
+                            <div class="text-end">
+                                <strong>${product.price} TND</strong><br>
+                                ${stockBadge}
+                            </div>
+                        </div>
+                    </a>
+                `);
+                
+                $item.on('click', (e) => {
+                    e.preventDefault();
+                    this.addToCart(product);
+                    $('#searchInput').val('').focus();
+                    $('#searchResults').hide();
+                });
+                
+                $list.append($item);
+            });
+        }
+        
+        $('#searchResults').show();
+    },
+    
+    addToCart(product) {
+        if (product.stock <= 0) {
+            toastr.error('Produit en rupture de stock');
+            return;
+        }
+        
+        const existingItem = this.cart.find(item => item.id === product.id);
+        
+        if (existingItem) {
+            if (existingItem.quantity >= product.stock) {
+                toastr.warning('Quantité maximale atteinte');
+                return;
+            }
+            existingItem.quantity++;
+        } else {
+            this.cart.push({
+                ...product,
+                quantity: 1
+            });
+        }
+        
+        this.renderCart();
+        this.updateTotals();
+        toastr.success(`${product.name} ajouté au panier`);
+    },
+    
+    removeFromCart(productId) {
+        this.cart = this.cart.filter(item => item.id !== productId);
+        this.renderCart();
+        this.updateTotals();
+    },
+    
+    updateQuantity(productId, quantity) {
+        const item = this.cart.find(item => item.id === productId);
+        if (item) {
+            if (quantity <= 0) {
+                this.removeFromCart(productId);
+            } else if (quantity <= item.stock) {
+                item.quantity = quantity;
+                this.renderCart();
+                this.updateTotals();
+            } else {
+                toastr.warning('Quantité supérieure au stock disponible');
+            }
+        }
+    },
+    
+    renderCart() {
+        const $cartItems = $('#cartItems');
+        
+        if (this.cart.length === 0) {
+            $cartItems.html(`
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                    <p>Le panier est vide. Commencez à scanner des produits.</p>
+                </div>
+            `);
+            $('#processSaleBtn').prop('disabled', true);
+            return;
+        }
+        
+        $cartItems.empty();
+        
+        this.cart.forEach(item => {
+            const total = item.price * item.quantity;
+            const $item = $(`
+                <div class="cart-item">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">${item.name}</h6>
+                            <small class="text-muted">${item.price} TND × ${item.quantity}</small>
+                        </div>
+                        <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="quantity-controls btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary minus-btn" data-id="${item.id}">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" class="form-control text-center quantity-input" 
+                                   value="${item.quantity}" min="1" max="${item.stock}" 
+                                   data-id="${item.id}" style="width: 60px;">
+                            <button class="btn btn-outline-secondary plus-btn" data-id="${item.id}">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <strong>${total.toFixed(2)} TND</strong>
+                    </div>
+                </div>
+            `);
+            
+            $item.find('.remove-item').on('click', () => this.removeFromCart(item.id));
+            $item.find('.minus-btn').on('click', () => this.updateQuantity(item.id, item.quantity - 1));
+            $item.find('.plus-btn').on('click', () => this.updateQuantity(item.id, item.quantity + 1));
+            $item.find('.quantity-input').on('change', function() {
+                POS.updateQuantity(item.id, parseInt($(this).val()) || 1);
+            });
+            
+            $cartItems.append($item);
+        });
+        
+        $('#processSaleBtn').prop('disabled', false);
+    },
+    
+    updateTotals() {
+        let subtotal = 0;
+        let taxAmount = 0;
+        
+        this.cart.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            subtotal += itemTotal;
+            taxAmount += itemTotal * (item.taxRate / 100);
+        });
+        
+        const discount = parseFloat($('#discountPercent').val()) || 0;
+        const discountAmount = (subtotal + taxAmount) * (discount / 100);
+        const total = subtotal + taxAmount - discountAmount;
+        
+        $('#subtotal').text(subtotal.toFixed(2) + ' TND');
+        $('#taxAmount').text(taxAmount.toFixed(2) + ' TND');
+        $('#discountAmount').text(discountAmount.toFixed(2) + ' TND');
+        $('#totalAmount').text(total.toFixed(2) + ' TND');
+        
+        this.calculateChange();
+    },
+    
+    calculateChange() {
+        const total = parseFloat($('#totalAmount').text()) || 0;
+        const paid = parseFloat($('#amountPaid').val()) || 0;
+        const change = paid - total;
+        
+        if (paid > 0 && change >= 0) {
+            $('#changeAmount').show();
+            $('#changeValue').text(change.toFixed(2) + ' TND');
+        } else {
+            $('#changeAmount').hide();
+        }
+    },
+    
+    updatePaymentMethod(method) {
+        if (method === 'cash') {
+            $('#cashPaymentSection').show();
+            $('#paymentReferenceSection').hide();
+        } else {
+            $('#cashPaymentSection').hide();
+            $('#paymentReferenceSection').show();
+        }
+    },
+    
+    processSale() {
+        const total = parseFloat($('#totalAmount').text()) || 0;
+        const paymentMethod = $('input[name="paymentMethod"]:checked').val();
+        const amountPaid = paymentMethod === 'cash' ? 
+            parseFloat($('#amountPaid').val()) || 0 : total;
+        
+        if (paymentMethod === 'cash' && amountPaid < total) {
+            toastr.error('Montant payé insuffisant');
+            return;
+        }
+        
+        const saleData = {
+            items: this.cart.map(item => ({
+                product_id: item.id,
+                quantity: item.quantity,
+                unit_price: item.price
+            })),
+            customer_name: $('#customerName').val(),
+            customer_phone: $('#customerPhone').val(),
+            payment_method: paymentMethod,
+            amount_paid: amountPaid,
+            payment_reference: $('#paymentReference').val(),
+            notes: $('#saleNotes').val(),
+            discount: parseFloat($('#discountPercent').val()) || 0
+        };
+        
+        $.ajax({
+            url: '{{ path("app_pos_create_sale") }}',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(saleData),
+            success: (response) => {
+                $('#saleNumber').text(response.invoice_number);
+                $('#saleTotal').text(response.total.toFixed(2) + ' TND');
+                $('#saleChange').text(response.change.toFixed(2) + ' TND');
+                $('#confirmSaleModal').modal('show');
+                toastr.success('Vente validée avec succès');
+            },
+            error: (xhr) => {
+                toastr.error(xhr.responseJSON?.error || 'Erreur lors de la vente');
+            }
+        });
+    },
+    
+    clearCart() {
+        if (this.cart.length === 0) return;
+        
+        if (confirm('Êtes-vous sûr de vouloir vider le panier?')) {
+            this.cart = [];
+            this.renderCart();
+            this.updateTotals();
+            $('#customerName, #customerPhone, #saleNotes').val('');
+            $('#discountPercent').val(0);
+            toastr.info('Panier vidé');
+        }
+    },
+    
+    newSale() {
+        this.clearCart();
+        $('#confirmSaleModal').modal('hide');
+        this.focusSearch();
+    },
+    
+    printReceipt() {
+        // TODO: Implémenter l'impression du reçu
+        window.print();
+    },
+    
+    activateScanner() {
+        // TODO: Activer le scanner de code-barres (caméra ou lecteur)
+        toastr.info('Scanner activé - Scannez un code-barres');
+    }
+};
+
+// Initialiser au chargement de la page
+$(document).ready(() => POS.init());
+</script>
+{% endblock %}
