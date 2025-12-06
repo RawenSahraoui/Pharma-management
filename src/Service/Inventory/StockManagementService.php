@@ -213,10 +213,10 @@ class StockManagementService
     public function getProductMovements(Product $product, int $limit = 50): array
     {
         return $this->movementRepository->findBy(
-            ['product' => $product],
-            ['movementDate' => 'DESC'],
-            $limit
-        );
+    ['product' => $product],
+    ['createdAt' => 'DESC'],  // ← CORRECTION
+    $limit
+);
     }
 
     /**

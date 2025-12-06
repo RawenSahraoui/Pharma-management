@@ -1,0 +1,229 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ isNew ? 'Nouveau Produit' : 'Modifier Produit' }}{% endblock %}
+
+{% block page_title %}
+    {{ isNew ? 'Nouveau Produit' : 'Modifier le Produit' }}
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <a href="{{ path('app_product_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-{{ isNew ? 'plus' : 'edit' }} me-2"></i>
+                        {{ isNew ? 'Créer un nouveau produit' : 'Modifier le produit' }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                    
+                    <div class="row">
+                        {# Informations de base #}
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Informations de base
+                            </h6>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.name) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.barcode) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.sku) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.category) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.description) }}
+                            </div>
+                        </div>
+
+                        {# Prix et Stock #}
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-dollar-sign me-2"></i>Prix et Stock
+                            </h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.purchasePrice) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.sellingPrice) }}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.taxRate) }}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    {{ form_row(form.stockQuantity) }}
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    {{ form_row(form.minStockLevel) }}
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    {{ form_row(form.maxStockLevel) }}
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.unit) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.packSize) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        {# Fabricant et Lot #}
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-industry me-2"></i>Fabricant et Lot
+                            </h6>
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.manufacturer) }}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.batchNumber) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_row(form.expiryDate) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Image #}
+                        <div class="col-md-6">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-image me-2"></i>Image du produit
+                            </h6>
+                            
+                            {% if not isNew and product.imagePath %}
+                                <div class="mb-3">
+                                    <img src="{{ asset('uploads/products/' ~ product.imagePath) }}" 
+                                         alt="{{ product.name }}" 
+                                         class="img-thumbnail" 
+                                         style="max-width: 200px;">
+                                </div>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                {{ form_row(form.imageFile) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    {# Informations médicales #}
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-notes-medical me-2"></i>Informations médicales
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.composition) }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.dosage) }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.sideEffects) }}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.contraindications) }}
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            {{ form_row(form.storageInstructions) }}
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    {# Options #}
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-cog me-2"></i>Options
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                {{ form_widget(form.requiresPrescription) }}
+                                {{ form_label(form.requiresPrescription) }}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                {{ form_widget(form.isActive) }}
+                                {{ form_label(form.isActive) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    {# Boutons #}
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>
+                                {{ isNew ? 'Créer le produit' : 'Enregistrer les modifications' }}
+                            </button>
+                            
+                            <a href="{{ path('app_product_index') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                            
+                            {% if not isNew %}
+                                <a href="{{ path('app_product_show', {id: product.id}) }}" class="btn btn-info btn-lg">
+                                    <i class="fas fa-eye me-2"></i>Voir le produit
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,230 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block page_title %}
+    Détails du produit
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <a href="{{ path('app_product_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+            </a>
+            <a href="{{ path('app_product_edit', {id: product.id}) }}" class="btn btn-warning">
+                <i class="fas fa-edit me-2"></i>Modifier
+            </a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash me-2"></i>Supprimer
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informations générales</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Nom:</th>
+                                    <td><strong>{{ product.name }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Code-barres:</th>
+                                    <td>{{ product.barcode }}</td>
+                                </tr>
+                                <tr>
+                                    <th>SKU:</th>
+                                    <td>{{ product.sku ?? '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Catégorie:</th>
+                                    <td>
+                                        <span class="badge bg-info">{{ product.category.name }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Fabricant:</th>
+                                    <td>{{ product.manufacturer ?? '-' }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Prix d'achat:</th>
+                                    <td><strong>{{ product.purchasePrice }} TND</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Prix de vente:</th>
+                                    <td><strong class="text-success">{{ product.sellingPrice }} TND</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Marge:</th>
+                                    <td><span class="badge bg-success">{{ product.profitMargin|number_format(2) }}%</span></td>
+                                </tr>
+                                <tr>
+                                    <th>TVA:</th>
+                                    <td>{{ product.taxRate }}%</td>
+                                </tr>
+                                <tr>
+                                    <th>Statut:</th>
+                                    <td>
+                                        {% if product.isActive %}
+                                            <span class="badge bg-success">Actif</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactif</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    {% if product.description %}
+                        <hr>
+                        <h6>Description:</h6>
+                        <p class="text-muted">{{ product.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Stock</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h6 class="text-muted">Stock actuel</h6>
+                            <h2 class="
+                                {% if product.stockQuantity == 0 %}text-danger
+                                {% elseif product.isLowStock %}text-warning
+                                {% else %}text-success{% endif %}
+                            ">
+                                {{ product.stockQuantity }}
+                            </h2>
+                            <small class="text-muted">{{ product.unit }}</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="text-muted">Seuil minimum</h6>
+                            <h3>{{ product.minStockLevel }}</h3>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="text-muted">Seuil maximum</h6>
+                            <h3>{{ product.maxStockLevel }}</h3>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="text-muted">Valeur stock</h6>
+                            <h3 class="text-primary">{{ product.totalValue|number_format(2) }} TND</h3>
+                        </div>
+                    </div>
+
+                    {% if product.isLowStock %}
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Stock faible ! Commandez de nouveaux produits.
+                        </div>
+                    {% endif %}
+
+                    {% if product.stockQuantity == 0 %}
+                        <div class="alert alert-danger mt-3">
+                            <i class="fas fa-times-circle me-2"></i>
+                            Produit en rupture de stock !
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            {% if product.imagePath %}
+                <div class="card shadow mb-4">
+                    <div class="card-body text-center">
+                        <img src="{{ asset('uploads/products/' ~ product.imagePath) }}" 
+                             alt="{{ product.name }}" 
+                             class="img-fluid rounded">
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-notes-medical me-2"></i>Informations médicales</h6>
+                </div>
+                <div class="card-body">
+                    {% if product.requiresPrescription %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-file-prescription me-2"></i>
+                            Nécessite une ordonnance
+                        </div>
+                    {% endif %}
+
+                    {% if product.composition %}
+                        <h6>Composition:</h6>
+                        <p class="small">{{ product.composition }}</p>
+                    {% endif %}
+
+                    {% if product.dosage %}
+                        <h6>Posologie:</h6>
+                        <p class="small">{{ product.dosage }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-calendar me-2"></i>Dates</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Créé le:</strong><br>{{ product.createdAt|date('d/m/Y H:i') }}</p>
+                    <p><strong>Modifié le:</strong><br>{{ product.updatedAt|date('d/m/Y H:i') }}</p>
+                    {% if product.expiryDate %}
+                        <p>
+                            <strong>Expire le:</strong><br>
+                            <span class="{% if product.isExpired %}text-danger{% elseif product.isNearExpiry %}text-warning{% endif %}">
+                                {{ product.expiryDate|date('d/m/Y') }}
+                            </span>
+                        </p>
+                    {% endif %}
+                    {% if product.batchNumber %}
+                        <p><strong>N° de lot:</strong><br>{{ product.batchNumber }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Modal de suppression #}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmer la suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer le produit <strong>{{ product.name }}</strong> ?</p>
+                <p class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Cette action est irréversible.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form method="post" action="{{ path('app_product_delete', {id: product.id}) }}" style="display: inline;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

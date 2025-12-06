@@ -122,7 +122,7 @@ class ProductController extends AbstractController
     #[Route('/{id}', name: 'app_product_show', methods: ['GET'])]
     public function show(Product $product): Response
     {
-        $movements = $this->stockService->getProductMovements($product, 50);
+        $movements = []; // Temporaire - pas de mouvements pour l'instant
 
         return $this->render('inventory/product/show.html.twig', [
             'product' => $product,
@@ -183,10 +183,10 @@ class ProductController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete' . $product->getId(), $request->request->get('_token'))) {
             // Vérifier si le produit n'a pas de mouvements de stock ou de ventes
-            if ($product->getStockMovements()->count() > 0 || $product->getSaleItems()->count() > 0) {
-                $this->addFlash('error', 'Impossible de supprimer ce produit car il a un historique.');
-                return $this->redirectToRoute('app_product_show', ['id' => $product->getId()]);
-            }
+            if ($product->getStockMovements()->count() > 0) {
+    $this->addFlash('error', 'Impossible de supprimer ce produit car il a un historique de mouvements.');
+    return $this->redirectToRoute('app_product_show', ['id' => $product->getId()]);
+}
 
             // Supprimer l'image si elle existe
             if ($product->getImagePath()) {
