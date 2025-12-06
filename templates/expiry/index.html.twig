@@ -1,0 +1,223 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Produits Périmés - PharmaPro{% endblock %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    {# Statistiques #}
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-danger shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Produits périmés</h6>
+                            <h2 class="mb-0 text-danger">{{ stats.expired }}</h2>
+                        </div>
+                        <div class="text-danger">
+                            <i class="fas fa-times-circle fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-warning shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Expirant dans 30 jours</h6>
+                            <h2 class="mb-0 text-warning">{{ stats.expiring_30days }}</h2>
+                        </div>
+                        <div class="text-warning">
+                            <i class="fas fa-exclamation-triangle fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-info shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Expirant dans 90 jours</h6>
+                            <h2 class="mb-0 text-info">{{ stats.expiring_90days }}</h2>
+                        </div>
+                        <div class="text-info">
+                            <i class="fas fa-info-circle fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Filtres #}
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <div class="btn-group" role="group">
+                <a href="{{ path('app_expiry_index', {filter: 'all'}) }}" 
+                   class="btn btn-outline-primary {{ filter == 'all' ? 'active' : '' }}">
+                    <i class="fas fa-list me-1"></i> Tous
+                </a>
+                <a href="{{ path('app_expiry_index', {filter: 'expired'}) }}" 
+                   class="btn btn-outline-danger {{ filter == 'expired' ? 'active' : '' }}">
+                    <i class="fas fa-times-circle me-1"></i> Périmés ({{ stats.expired }})
+                </a>
+                <a href="{{ path('app_expiry_index', {filter: 'expiring_soon'}) }}" 
+                   class="btn btn-outline-warning {{ filter == 'expiring_soon' ? 'active' : '' }}">
+                    <i class="fas fa-exclamation-triangle me-1"></i> 30 jours ({{ stats.expiring_30days }})
+                </a>
+                <a href="{{ path('app_expiry_index', {filter: 'expiring_3months'}) }}" 
+                   class="btn btn-outline-info {{ filter == 'expiring_3months' ? 'active' : '' }}">
+                    <i class="fas fa-calendar me-1"></i> 90 jours ({{ stats.expiring_90days }})
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {# Tableau des produits #}
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-calendar-times me-2"></i>
+                Liste des produits
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Nom du produit</th>
+                            <th>Code-barres</th>
+                            <th>Lot</th>
+                            <th>Date d'expiration</th>
+                            <th>Jours restants</th>
+                            <th>Stock</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in pagination %}
+                        {% set today = 'now'|date('Y-m-d') %}
+                        {% set expiry = product.expiryDate|date('Y-m-d') %}
+                        {% set diff = date(expiry).diff(date(today)) %}
+                        {% set daysLeft = expiry < today ? -1 : diff.days %}
+                        
+                        <tr class="
+                            {% if daysLeft < 0 %}table-danger
+                            {% elseif daysLeft <= 30 %}table-warning
+                            {% endif %}
+                        ">
+                            <td>
+                                {% if product.imagePath %}
+                                    <img src="{{ asset('uploads/products/' ~ product.imagePath) }}" 
+                                         alt="{{ product.name }}" class="rounded" 
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/40?text=No+Img" 
+                                         alt="Produit" class="rounded" 
+                                         style="width: 40px; height: 40px;">
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ product.name }}</strong>
+                                <br>
+                                <small class="text-muted">{{ product.category.name }}</small>
+                            </td>
+                            <td><code>{{ product.barcode }}</code></td>
+                            <td>{{ product.batchNumber ?? '-' }}</td>
+                            <td>{{ product.expiryDate|date('d/m/Y') }}</td>
+                            <td>
+                                {% if daysLeft < 0 %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times-circle me-1"></i>
+                                        Périmé depuis {{ daysLeft|abs }} jour(s)
+                                    </span>
+                                {% elseif daysLeft == 0 %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-exclamation-circle me-1"></i>
+                                        Expire aujourd'hui
+                                    </span>
+                                {% elseif daysLeft <= 7 %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        {{ daysLeft }} jour(s)
+                                    </span>
+                                {% elseif daysLeft <= 30 %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        {{ daysLeft }} jour(s)
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-info">
+                                        {{ daysLeft }} jour(s)
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ product.stockQuantity > 0 ? 'success' : 'secondary' }}">
+                                    {{ product.stockQuantity }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if daysLeft < 0 %}
+                                    <span class="badge bg-danger">PÉRIMÉ</span>
+                                {% elseif daysLeft <= 30 %}
+                                    <span class="badge bg-warning">URGENT</span>
+                                {% else %}
+                                    <span class="badge bg-info">À SURVEILLER</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ path('app_product_show', {id: product.id}) }}" 
+                                       class="btn btn-info" title="Voir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_product_edit', {id: product.id}) }}" 
+                                       class="btn btn-warning" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% if daysLeft < 0 and product.stockQuantity > 0 %}
+                                        <form method="post" 
+                                              action="{{ path('app_expiry_remove_expired') }}" 
+                                              style="display: inline;"
+                                              onsubmit="return confirm('Retirer ce produit périmé du stock ?');">
+                                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Retirer du stock">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                <p class="text-muted">Aucun produit trouvé pour ce filtre.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {# Pagination #}
+            <div class="navigation mt-3">
+                {{ knp_pagination_render(pagination) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
